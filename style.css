@@ -1,0 +1,19 @@
+
+* { padding: 0; margin: 0;}
+	
+canvas { background: #4a8ef6; display: inline-block; margin: 10 auto; }
+	
+		#secCanvas{
+    		right: 100px;
+			top: 5px;  
+			 vertical-align: top;
+			 margin : 0;
+
+    	}
+
+		#myCanvas{
+    		outline: 2px solid #000;
+         left: 600px;
+         top: 200px;
+         margin: 0 auto;
+    	}
