@@ -29,9 +29,8 @@ class Rules {
     const pos = this.fillPos(now, pre);
     const dir = this.fillDir(pos.a1, pos.b1, pos.a2, pos.b2, 1);
     const white = (clr === 'w' && (dir.up || dir.left));
-    const black = (clr === 'b' && (dir.down || dir.right));
     const cr = (clr === 'Rb' && (dir.up || dir.down || dir.right || dir.left));
-    if (white || black || cr) return true;
+    if (white || cr) return true;
     return false;
   }
 }

@@ -1,13 +1,15 @@
 'use strict';
 
 class Cell {
-  constructor(num, x, y, a, b) {
+  constructor(num, x, y, a, b, xDesk, yDesk) {
     this.num = num;
     this.cheker = 'null';
     this.x = x;
     this.y = y;
     this.a = a;
     this.b = b;
+    this.xDesk = xDesk;
+    this.yDesk = yDesk;
   }
 }
 
@@ -48,10 +50,10 @@ class ChekArr {
         const b = 4 + i - j;
         let dblSideI = 2 * side * i + side;
         let dblSideJ = 2 * side * j;
-        const elem = new Cell(numCell, dblSideI, dblSideJ, a, b);
+        const elem = new Cell(numCell, dblSideI, dblSideJ, a, b, 2 * i + 1,2 * j);
         dblSideI -= side;
         dblSideJ += side;
-        const elem2 = new Cell(numCell + 4, dblSideI, dblSideJ, a, b - 1);
+        const elem2 = new Cell(numCell + 4, dblSideI, dblSideJ, a, b - 1, 2 * i, 2 * j + 1);
         this.arr[a][b] = elem;
         this.arr[a][b - 1] = elem2;
         numCell++;

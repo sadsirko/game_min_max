@@ -4,7 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const Websocket = require('websocket').server;
 const clients = [];
-
+let clientData = [];
 
 
 const server = http.createServer(async (req, res) => {
@@ -31,22 +31,27 @@ const ws = new Websocket({
 });
 
 
-
 ws.on('request', req => {
-
-
   const connection = req.accept('', req.origin);
   clients.push(connection);
   console.log('Connected ' + connection.remoteAddress);
   connection.on('message', message => {
     const dataName = message.type + 'Data';
     const data = message[dataName];
+    clientData =  JSON.parse(data);
+    for (const i of clientData) {
+      for (const j of i) {
+        console.log(j.num, j.xDesk, j.yDesk);
+      }
+    }
+    console.log(data);
     clients.forEach(client => {
       if (connection !== client) {
         client.send(data);
       }
     });
   });
+
   connection.on('close', (reasonCode, description) => {
     console.log('Disconnected ' + connection.remoteAddress);
     console.dir({ reasonCode, description });
