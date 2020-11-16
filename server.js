@@ -6,6 +6,7 @@ const Websocket = require('websocket').server;
 const clients = [];
 let clientData = [];
 const degh = 7;
+let arrOpp = [];
 
 const server = http.createServer(async (req, res) => {
   const url = req.url === '/' ? '/index.html' : req.url;
@@ -52,8 +53,8 @@ ws.on('request', req => {
     //rabbit test
     const rb = clientData.rabbit[0];
     resB.push(checkOpportunities(rb.a, rb.b, clientData.arr));
-    countOpportunity(clientData.arr);
-    console.log(resB);
+    arrOpp = countOpportunity(clientData.arr);
+    console.log(arrOpp);
     clients.forEach(client => {
       if (connection !== client) {
         client.send(JSON.stringify(clientData.arr));
@@ -98,7 +99,7 @@ function checkOpportunities(a, b, arr) {
   const upW = { a: a - 1, b };
   const rightW = { a, b: b + 1 };
   const downW = { a: a + 1, b };
-  const leftW = { a, b: b + 1 };
+  const leftW = { a, b: b - 1 };
   //check ooport for Wolf
   if (arr[a][b].cheker === 'w') {
     if (arr[upW.a][upW.b].cheker === 'null')
@@ -122,22 +123,83 @@ function checkOpportunities(a, b, arr) {
 
 function countOpportunity(situationArr) {
   let rbPos = { a: Infinity, b: Infinity };
+
   function createArray(arr, a = 7, b = 8) {
     for (let index = 0; index < a; index++) {
       arr[index] = [];
       for (let j = 0; j < b; j++) {
-        if (situationArr[index][j].cheker)
+        if (situationArr[index][j].cheker) {
           arr[index][j] = { a: index, b: j, destination: Infinity };
-        if (situationArr[index][j].cheker === 'bRb')
-          rbPos = { a: index, b: j };
-        else
+          if (situationArr[index][j].cheker === 'bRb')
+            rbPos = { a: index, b: j };
+        } else
           arr[index][j] = null;
       }
     }
   }
+
   const newArr = [];
-
   createArray(newArr);
-  console.log(newArr,rbPos);
+  newArr[rbPos.a][rbPos.b].destination = 0;
+  let x = 1;
+  let k = 0;
+  let pos = [];
+  let opport = [];
+  let opp1 = [];
+  const opp2 = [];
+  opport = checkOpportunities(rbPos.a, rbPos.b, clientData.arr);
+  opport.shift();
+  //console.log(newArr);
+  while (x < 10) {
+    k = pos.length - 1;
+    while (k >= 0) {
+      opp1 = opport;
+      //console.log(k);
+      opport = opp1.concat(checkOpportunitiesRb(pos[k].a, pos[k].b, clientData.arr));
+      k--;
+    }
 
+    opport.forEach(el => {
+      if (x < newArr[el.a][el.b].destination)
+        newArr[el.a][el.b].destination = x;
+    });
+    pos = forRecArray(x, newArr);
+    //console.log(newArr);
+    x++;
+    opport = [];
+  }
+  return newArr;
+
+  function forRecArray(num, arr, a = 7, b = 8) {
+    const res = [];
+    for (let index = 0; index < a; index++) {
+      for (let j = 0; j < b; j++) {
+        if (arr[index][j] != null) {
+          if (arr[index][j].destination === num) {
+            res.push({ a: index, b: j });
+          }
+        }
+      }
+    }
+    return res;
+  }
+
+  function checkOpportunitiesRb(a, b, arr) {
+    const opportunities = [];
+    opportunities.push({ a, b });
+    const upW = { a: a - 1, b };
+    const rightW = { a, b: b + 1 };
+    const downW = { a: a + 1, b };
+    const leftW = { a, b: b - 1 };
+    //check opport for Rabbit
+    if ( (upW.a > 0) && arr[upW.a][upW.b] && arr[upW.a][upW.b].cheker === 'null')
+      opportunities.push(upW);
+    if ( (rightW.b < 8) && arr[rightW.a][rightW.b] &&  arr[rightW.a][rightW.b].cheker === 'null')
+      opportunities.push(rightW);
+    if ( (downW.a < 7) &&   arr[downW.a][downW.b] && arr[downW.a][downW.b].cheker === 'null')
+      opportunities.push(downW);
+    if ( (leftW.b > 0) && arr[leftW.a][leftW.b] && arr[leftW.a][leftW.b].cheker === 'null')
+      opportunities.push(leftW);
+    return opportunities;
+  }
 }
