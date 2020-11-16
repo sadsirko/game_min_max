@@ -15,7 +15,7 @@ function everyStep(drawing, rule, spec, mover, choosCellNow, choosCellPrev) {
         mover.moveWolf(choosCellNow, choosCellPrev, col, antCl, spec.flag);
         if (spec.findSpecAr(choosCellPrev).cheker === 'null') {
           spec.changeFlag(char);
-          socket.send(JSON.stringify(spec.arr));
+          socket.send(JSON.stringify(spec));
         }
       }
       // spec.chekOnRbown();
@@ -24,7 +24,7 @@ function everyStep(drawing, rule, spec, mover, choosCellNow, choosCellPrev) {
 
   makeMove(spec.flag, 'w', 'wRb', 'b', '-');
   makeMove(!spec.flag, 'b', 'bRb', 'w', '+');
-  //console.table(spec.arr);
+  // console.table(spec.arr);
   //console.log(spec.arr[0][3]);
   spec.drawChekers();
 

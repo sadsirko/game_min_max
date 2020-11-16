@@ -24,9 +24,11 @@ class ChekArr {
     this.listen = listener;
     this.choosenCellNow = 0;
     this.choosenCellPrev = 19;
-    this.flag = 1;
+    this.flag = 0;
     this.specArrHeight = 7;
     this.specArrWidth = 8;
+    this.wolf = [];
+    this.rabbit = [];
   }
 
   changeFlag(sym) {
@@ -50,7 +52,7 @@ class ChekArr {
         const b = 4 + i - j;
         let dblSideI = 2 * side * i + side;
         let dblSideJ = 2 * side * j;
-        const elem = new Cell(numCell, dblSideI, dblSideJ, a, b, 2 * i + 1,2 * j);
+        const elem = new Cell(numCell, dblSideI, dblSideJ, a, b, 2 * i + 1, 2 * j);
         dblSideI -= side;
         dblSideJ += side;
         const elem2 = new Cell(numCell + 4, dblSideI, dblSideJ, a, b - 1, 2 * i, 2 * j + 1);

@@ -1,9 +1,8 @@
 'use strict';
 
 class Rules {
-  constructor(desk, draw) {
+  constructor(desk) {
     this.spec = desk;
-    this.drawing = draw;
     this.LINES = 4;
   }
 
@@ -19,8 +18,8 @@ class Rules {
   fillDir(a1, b1, a2, b2, length) {
     const up =  (a2 - a1 === length && (b1 === b2));
     const down = (a1 - a2 === length && (b1 === b2));
-    const left = (a1 === a2 && b1 - b2 === length);
-    const right = (a1 === a2 && (b2 - b1 === length));
+    const right = (a1 === a2 && b1 - b2 === length);
+    const left = (a1 === a2 && (b2 - b1 === length));
     const res = { up, down, left, right };
     return res;
   }
@@ -28,9 +27,11 @@ class Rules {
   ruleForStep(now, pre, clr) {
     const pos = this.fillPos(now, pre);
     const dir = this.fillDir(pos.a1, pos.b1, pos.a2, pos.b2, 1);
-    const white = (clr === 'w' && (dir.up || dir.left));
+    const white = (clr === 'w' && (dir.up || dir.right));
     const cr = (clr === 'Rb' && (dir.up || dir.down || dir.right || dir.left));
     if (white || cr) return true;
     return false;
   }
 }
+
+
