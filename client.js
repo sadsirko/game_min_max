@@ -25,8 +25,7 @@ socket.onclose = () => {
 
 socket.onmessage = event => {
   spec.arr =  JSON.parse(event.data);
-  if (spec.flag) spec.changeFlag('-');
-  else spec.changeFlag('+');
+  spec.changeFlag('+');
   everyStep(drawing, rule, spec, mover);
 };
 

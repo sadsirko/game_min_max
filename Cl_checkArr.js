@@ -32,8 +32,8 @@ class ChekArr {
   }
 
   changeFlag(sym) {
-    if (sym === '+') this.flag++;
-    else this.flag--;
+    if (sym === '+') this.flag = 0;
+    else this.flag = 1;
   }
 
   workWithSpecArr() {
