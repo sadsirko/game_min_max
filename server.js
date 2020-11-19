@@ -6,7 +6,7 @@ const Websocket = require('websocket').server;
 const clients = [];
 let clientData = [];
 const degh = 7;
-let desisions = [];
+const desisions = [];
 let arrOpp = [];
 
 const server = http.createServer(async (req, res) => {
@@ -57,7 +57,8 @@ ws.on('request', req => {
     resB.push(checkOpportunities(rb.a, rb.b, clientData.arr));
     //console.log(resW);
     arrOpp = countOpportunity(clientData.arr);
-    console.log(arrOpp);
+    //console.log(arrOpp);
+    createTree(clientData.arr);
     decideMoveW(clientData);
 
     clients.forEach(client => {
@@ -223,17 +224,16 @@ function countOpportunity(situationArr) {
   }
 }
 
-
 function decideMoveW(clientData) {
 
   const res = [];
   let arrLoc = [];
   let opWolf = [];
-  const dectinationToEnd = [];
   let move;
   clientData = findWolfsAdnRabb(clientData);
   arrLoc = createArray(clientData.arr);
   const locA = clientData.rabbit[0];
+  //console.log(locA);
   if (locA === { a: 3, b: 0 } ||
       locA === { a: 6, b: 3 } ||
       locA === { a: 4, b: 1 } ||
@@ -245,12 +245,13 @@ function decideMoveW(clientData) {
     }
   );
 
-  console.log(res);
+  //console.log(res);
   opWolf = countOpportunity(arrLoc);
   //console.log(opWolf);
   //console.log(minToEnd(opWolf));
-  move = findMax(res, opWolf, arrLoc);
 
+  move = findMax(res, opWolf, arrLoc);
+  createTree(clientData.arr);
   clientData.arr[move.a1][move.b1].cheker = 'null';
   clientData.arr[move.a2][move.b2].cheker = 'w';
 
@@ -286,7 +287,7 @@ function decideMoveW(clientData) {
     arrL.push(opWolf[5][2].destination);
     arrL.push(opWolf[6][3].destination);
     min = findmin(arrL);
-    console.log(arrL);
+    //console.log(arrL);
     return min;
   }
 
@@ -298,29 +299,304 @@ function decideMoveW(clientData) {
     }
     return mini;
   }
+}
 
+function createArray(situationArr, a = 7, b = 8) {
+  const arr = [];
+  for (let index = 0; index < a; index++) {
+    arr[index] = [];
+    for (let j = 0; j < b; j++) {
+      if (situationArr[index][j].cheker) {
+        arr[index][j] = { cheker: 'null', a: index, b: j, destination: Infinity };
+        if (situationArr[index][j].cheker === 'bRb')
+          arr[index][j] = { cheker: 'bRb', a: index, b: j, destination: 0 };
+        if (situationArr[index][j].cheker === 'w')
+          arr[index][j] = { cheker: 'w', a: index, b: j, destination: Infinity };
+      } else
+        arr[index][j] = {};
+    }
+  }
+  return arr;
+}
 
-  function createArray(situationArr, a = 7, b = 8) {
-    const arr = [];
-    for (let index = 0; index < a; index++) {
-      arr[index] = [];
-      for (let j = 0; j < b; j++) {
-        if (situationArr[index][j].cheker) {
-          arr[index][j] = { cheker: 'null', a: index, b: j, destination: Infinity };
-          if (situationArr[index][j].cheker === 'bRb')
-            arr[index][j] = { cheker: 'bRb', a: index, b: j, destination: 0 };
-          if (situationArr[index][j].cheker === 'w')
-            arr[index][j] = { cheker: 'w', a: index, b: j, destination: Infinity };
-        } else
-          arr[index][j] = {};
+class Des {
+  constructor(arrTable, num) {
+    this.arrTb = arrTable;
+    this.parent = [];
+    this.child = [];
+    this.num = num;
+    this.mark;
+  }
+  mark() {
+    const res = [];
+    let arrLoc = [];
+    let opWolf = [];
+    let move;
+    const pos = this.findWolfsAdnRabbToObj(this.arrTb);
+    arrLoc = createArray(this.arrTb);
+    const locA = pos.rabbit[0];
+    //console.log(locA);
+    if (locA === { a: 3, b: 0 } ||
+      locA === { a: 6, b: 3 } ||
+      locA === { a: 4, b: 1 } ||
+      locA === { a: 5, b: 2 })
+      return 'winOfRabbit';
+    pos.wolf.forEach(
+      el => {
+        res.push(checkOpportunities(el.a, el.b, arrLoc));
+      }
+    );
+
+    //console.log(res);
+    opWolf = countOpportunity(arrLoc);
+    //console.log(opWolf);
+    //console.log(minToEnd(opWolf));
+    move = findMax(res, opWolf, arrLoc);
+    this.mark =  move.max;
+    function findMax(wCan, opWolf, arrL) {
+      let tmp;
+      let a1, a2, b1, b2;
+      const max = { a1, a2, b1, b2, max: 0 };
+      for (let i = 0; i < wCan.length; i++) {
+        for (let j = 1; j < wCan[i].length; j++) {
+          arrL[wCan[i][0].a][wCan[i][0].b].cheker = 'null';
+          arrL[wCan[i][j].a][wCan[i][j].b].cheker = 'w';
+          opWolf = countOpportunity(arrL);
+          arrL[wCan[i][0].a][wCan[i][0].b].cheker = 'w';
+          arrL[wCan[i][j].a][wCan[i][j].b].cheker = 'null';
+          tmp = minToEnd(opWolf);
+          //console.log(tmp);
+          //sconsole.log(opWolf);
+          if (max.max < tmp) {
+            max.a1 = wCan[i][0].a, max.a2 = wCan[i][j].a,
+            max.b1 = wCan[i][0].b, max.b2 = wCan[i][j].b;
+            max.max = tmp;
+          }
+        }
+      }
+      return max;
+    }
+
+    function minToEnd(opWolf) {
+      const arrL = [];
+      let min = Infinity;
+      arrL.push(opWolf[3][0].destination);
+      arrL.push(opWolf[4][1].destination);
+      arrL.push(opWolf[5][2].destination);
+      arrL.push(opWolf[6][3].destination);
+      min = findmin(arrL);
+      //console.log(arrL);
+      return min;
+    }
+
+    function findmin(arr) {
+      let mini = Infinity;
+      for (const i of arr) {
+        if (mini > i)
+          mini = i;
+      }
+      return mini;
+    }
+  }
+
+  findWolfsAdnRabbToObj(arr) {
+    const res = {};
+    res.rabbit = [];
+    res.wolf = [];
+    for (let j = 0; j < 4; j++) {
+      for (let i = 0; i < 4; i++) {
+        const a = 0 + i + j;
+        const b = 4 + i - j;
+        if (arr[a][b].cheker === 'bRb') {
+          res.rabbit.push({ a, b });
+        }
+        if (arr[a][b - 1].cheker === 'bRb') {
+          res.rabbit.push({ a, b: b - 1 });
+        }
+
+        if (arr[a][b].cheker === 'w') {
+          res.wolf.push({ a, b });
+        }
+        if (arr[a][b - 1].cheker === 'w') {
+          res.wolf.push({ a, b: b - 1 });
+        }
       }
     }
-    return arr;
+    return res;
   }
 }
 
-Class Des {
-  constructor(){
+function createTree(arreyMain) {
+  const deskArr = createArray(arreyMain, 7, 8);
+  let tree = [[]];
+
+
+  function firstFilling() {
+    const positions = findWolfsAdnRabbToObj(deskArr);
+    const res = [];
+    const realHalf = [[]];
+    positions.wolf.forEach(
+      el => {
+        res.push(checkOpportunities(el.a, el.b, deskArr));
+      });
+    for (let i = 0; i < res.length; i++) {
+      for (let j = 1; j < res[i].length; j++) {
+        deskArr[res[i][0].a][res[i][0].b].cheker = 'null';
+        deskArr[res[i][j].a][res[i][j].b].cheker = 'w';
+        realHalf[0].push(new Des(createArray(deskArr, 7, 8), realHalf[0].length));
+
+        deskArr[res[i][0].a][res[i][0].b].cheker = 'w';
+        deskArr[res[i][j].a][res[i][j].b].cheker = 'null';
+      }
+    }
+    return realHalf;
+  }
+
+
+  function secondHalf(tree) {
+    tree.push([]);
+    tree[tree.length - 2].forEach(
+      el => {
+        const deskArr = el.arrTb;
+        const pos = findWolfsAdnRabbToObj(el.arrTb);
+        const res  = checkOpportunities(pos.rabbit[0].a, pos.rabbit[0].b, el.arrTb);
+        for (let j = 1; j < res.length; j++) {
+          //console.log(res);
+          deskArr[res[0].a][res[0].b].cheker = 'null';
+          deskArr[res[j].a][res[j].b].cheker = 'bRb';
+          //tree.push([1]);
+          //console.log(tree[tree.length - 1]);
+          tree[tree.length - 1].push(new Des(createArray(deskArr, 7, 8), tree[tree.length - 1].length));
+          tree[tree.length - 1][tree[tree.length - 1].length - 1 ].parent =  el.num;
+          tree[tree.length - 1][tree[tree.length - 1].length - 1 ].mark();
+          deskArr[res[0].a][res[0].b].cheker = 'bRb';
+          deskArr[res[j].a][res[j].b].cheker = 'null';
+        }
+      }
+    );
 
   }
+
+
+  function upperHalf(tree) {
+    tree.push([]);
+    tree[tree.length - 2].forEach(
+      el => {
+        const deskArr = el.arrTb;
+        const pos = findWolfsAdnRabbToObj(el.arrTb);
+        const res = [];
+        pos.wolf.forEach(
+          elem => {
+            res.push(checkOpportunities(elem.a, elem.b, deskArr));
+          });
+        for (let i = 0; i < res.length; i++) {
+          for (let j = 1; j < res[i].length; j++) {
+          //console.log(res);
+            deskArr[res[i][0].a][res[i][0].b].cheker = 'null';
+            deskArr[res[i][j].a][res[i][j].b].cheker = 'w';
+            //tree.push([1]);
+            //console.log(tree[tree.length - 1]);
+            tree[tree.length - 1].push(new Des(createArray(deskArr, 7, 8), tree[tree.length - 1].length));
+            tree[tree.length - 1][tree[tree.length - 1].length - 1 ].parent =  el.num;
+            tree[tree.length - 1][tree[tree.length - 1].length - 1 ].mark();
+            deskArr[res[i][0].a][res[i][0].b].cheker = 'w';
+            deskArr[res[i][j].a][res[i][j].b].cheker = 'null';
+          }
+        }
+      }
+    );
+  }
+
+  tree = firstFilling();
+  secondHalf(tree);
+  upperHalf(tree);
+  secondHalf(tree);
+  console.log(tree);
+  //console.log(minOfVar(tree, 2));
+  //console.log(maxOfVar(tree, 2));
+  //
+  // upperHalf(tree);
+  // secondHalf(tree);
+  //
+  // upperHalf(tree);
+  // secondHalf(tree);
+
+
+
+  //console.log(tree);
+
+  function  findWolfsAdnRabbToObj(arr) {
+    const res = {};
+    res.rabbit = [];
+    res.wolf = [];
+    for (let j = 0; j < 4; j++) {
+      for (let i = 0; i < 4; i++) {
+        const a = 0 + i + j;
+        const b = 4 + i - j;
+        if (arr[a][b].cheker === 'bRb') {
+          res.rabbit.push({ a, b });
+        }
+        if (arr[a][b - 1].cheker === 'bRb') {
+          res.rabbit.push({ a, b: b - 1 });
+        }
+
+        if (arr[a][b].cheker === 'w') {
+          res.wolf.push({ a, b });
+        }
+        if (arr[a][b - 1].cheker === 'w') {
+          res.wolf.push({ a, b: b - 1 });
+        }
+      }
+    }
+    return res;
+  }
+
+  function minOfVar(tree, gen) {
+    const newArr = [];
+    let tmp = 0;
+    let tmp1 = 1;
+    let tmp2;
+    tree[gen].forEach(
+      el => {
+        if (tmp1) {
+          tmp = el.parent;
+          tmp2 = tmp1;
+          newArr[el.parent] = el.mark;
+          tmp1--;
+        } else if (tmp2 === el.parent) {
+          if (el.mark < newArr[tmp])
+            newArr[el.parent] = el.mark;
+        } else {
+          tmp = el.parent;
+          tmp2 = tmp1;
+          newArr[el.parent] = el.mark;
+          tmp1++;
+        }
+      }
+    );
+    return newArr;
+  }
+
+  function maxOfVar(tree, gen) {
+    const newArr = [];
+    let tmp = 0;
+    let tmp1 = 1;
+    let tmp2;
+    tree[gen].forEach(
+      el => {
+        if (!tmp[el.parent]) {
+          //console.log(el.parent);
+          tmp = el.parent;
+          tmp2 = tmp1;
+          newArr[el.parent] = el.mark;
+          tmp1--;
+        } else if (tmp2 == el.parent) {
+          if (el.mark > newArr[tmp])
+            newArr[el.parent] = el.mark;
+        }
+      }
+    );
+    return newArr;
+  }
 }
+
